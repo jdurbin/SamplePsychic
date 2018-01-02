@@ -20,16 +20,17 @@ import com.vaadin.data.util.filter.Compare
 import com.vaadin.data.util.filter.Compare.*;
 import com.vaadin.data.Container.*
 
+import grapnel.util.*
+import grapnel.weka.*
+
 class ClassificationResultsGrid extends Grid{
 	SamplePsychicUI app;
 	HeaderRow filterRow;
-	ClassifierCompendium cc;
 	def firstItemID;
 	
 	
 	def ClassificationResultsGrid(SamplePsychicUI vapp){		
 		app = vapp
-		cc = app.compendium;
 		
 		System.err.println "*** App..size = "+app.results.size()
 		
@@ -170,27 +171,40 @@ class ClassificationResultsGrid extends Grid{
 		container.addContainerProperty("Sample ID",String.class,null);
 		container.addContainerProperty("Model",String.class,null);
 		container.addContainerProperty("Call",String.class,null);
-		container.addContainerProperty("Confidence",Double.class,null);
+		container.addContainerProperty("Score",Double.class,null);
 		
 		System.err.println "Grid about to add ${results.size()} results to grid."		
 		
 		results.eachWithIndex{r,i->						
-			def model = cc.modelName2Model[r.modelName]			
+			def model = app.selectedSignatureSets.modelName2Model[r.modelName]
+			if (model == null){
+				System.err.println "DEBUG: r.modelName: "+r.modelName
+				System.err.println "DEBUG: modelName2Model: "+app.selectedSignatureSets.modelName2Model
+			}
+					
+/*						
 			def (callValue,idx) = r.callAndIdx()		
 			// Skip samples whose best call is is not the 0 value. 
 			// KJD: FIX... must take this as an input from signature set... might be 0, might be 1
-			if (idx != 1) return; 
+			if (idx != 1) {
+				System.err.println "ClassificationsResultGrid for {r.modelName} idx ==0"
+				return;
+			}else{
+				System.err.println "ClassificationsResultGrid for {r.modelName} idx ==1"
+			} 			
 
 			//def idx = 0; // Always take the perspective of the 0 value. 
 			//def callValue = r.classValues[idx] 
+			*/
 			
+			def callValue = r.classValues[r.preferredIdx]
 			def bnm = model.bnm
-			def dynamicbin = bnm.nullDistribution[idx]
+			def dynamicbin = bnm.nullDistribution[r.preferredIdx]
 			//def values = dynamicbin.elements()
 			//def elements = values.elements() as ArrayList
-			def pr = r.prForValues[idx] // probability from classifier
+			def pr = r.prForValues[r.preferredIdx] // probability from classifier
 			pr = pr.round(3)
-			def nullConf = model.bnm.getSignificance(pr,idx)
+			def nullConf = model.bnm.getSignificance(pr,r.preferredIdx)
 			nullConf = nullConf.round(3)
 			//def pr0 = (float) r.prForValues[0]
 			
@@ -201,7 +215,8 @@ class ClassificationResultsGrid extends Grid{
 			item.getItemProperty("Sample ID").setValue(r.sampleID)
 			item.getItemProperty("Model").setValue(r.modelName)					
 			item.getItemProperty("Call").setValue(callValue)						
-			item.getItemProperty("Confidence").setValue(nullConf)
+			//item.getItemProperty("Confidence").setValue(nullConf)
+			item.getItemProperty("Score").setValue(pr)
 			
 			//System.err.println "Added item itemID: $itemID"
 						

@@ -59,49 +59,60 @@ public class SamplePsychicUI extends UI {
 	//static String modelDir = "/Users/james/ucsc/exp/debug/small_models_TCGAbackground/";
 	//static String genedescriptions = "/Users/james/exp/refseqdescript/ucsc/hugo2description.txt";
 	
-	public static String genedescriptions = VaadinServlet.getCurrent().getServletContext().getRealPath("/genedesc/hugo2description.txt");	
-	
-	// Read models from a server relative directory....
-	public static ClassifierCompendium compendium = new ClassifierCompendium(
-			VaadinServlet.getCurrent().getServletContext().getRealPath("/models")
-	);
-	
-	public static String modelDir = VaadinServlet.getCurrent().getServletContext().getRealPath("/models");	
 	/**
 	 *  Storage of Models and other Data
 	 *  
-	 *  TODO: This only loads classifier Compendium on first visit to website.  
-	 *  Should do it when server is started.
-	 *  
+	 *  TODO: This currently loads signatures on first visit to website.   
+	 *  Ideally would do it when server is started even without a connection. 
+	 *
 	 */
-	//public static ClassifierCompendium compendium = new ClassifierCompendium(modelDir);
+	static SignatureSets signatureSets;
+	static SignatureSets selectedSignatureSets;
+	static HashMap gene2description; 
+	static HashMap ensembl2hgnc;
+	static String signatureSetDir;
+	static{				
+
+		// Read gene descriptions...	
+		String genedescriptions = VaadinServlet.getCurrent().getServletContext().getRealPath("/geneinfo/hugo2description.txt");	
+		System.err.println("GENE DESCRIPTIONS PATH:"+genedescriptions);
+		// RefSeq description of genes. 
+		gene2description = GeneInfo.readGeneDescriptions(genedescriptions);	
 		
+		// Read gene conversions...
+		String ensembl2hgncFile = VaadinServlet.getCurrent().getServletContext().getRealPath("/geneinfo/ensembl2hgnc.txt");	
+		System.err.println("GENE CONVERSIONS PATH:"+ensembl2hgncFile);
+		ensembl2hgnc = GeneInfo.readENSEMBL2HGNC(ensembl2hgncFile);		
+		
+		// Read signature sets...
+		signatureSetDir = VaadinServlet.getCurrent().getServletContext().getRealPath("/signaturesets");
+		System.err.println("SIGNATURE SET DIR:"+signatureSetDir);
+		signatureSets = new SignatureSets(signatureSetDir);				
+	}
 	
-	
-	
+	// Uploaded expression data
 	public Instances expressionData;	
+
+	// Results of classification run. 
 	public ArrayList<ClassificationPlus> results = new ArrayList<ClassificationPlus>();
+
+	// Optional metaData 
 	public Table metaData;
 
-	// RefSeq description of genes. 
-	HashMap gene2description = GeneInfo.readGeneDescriptions(genedescriptions);
-	
 	// Rootname for uploaded file. 
 	String fileNameRoot;
 	
+	// ID used to save session/results. 	
 	String currentRunID;
 
-
+	// Vaadin stuff...
 	@WebServlet(value = "/*", asyncSupported = true)
 	@VaadinServletConfiguration(productionMode = false, ui = SamplePsychicUI.class)
-	public static class Servlet extends VaadinServlet {			 
-	}
+	public static class Servlet extends VaadinServlet {	}
 
 	/***
 	 *  UI COMPONENTS
-	 *  
 	 */
-    //private final TestIcon testIcon = new TestIcon(100);
 	SamplePsychicMenuLayout root = new SamplePsychicMenuLayout();
 	ComponentContainer viewDisplay = root.getContentContainer();
 	Navigator navigator;
@@ -151,7 +162,7 @@ public class SamplePsychicUI extends UI {
 			System.err.println("runID in SamplePsychicUI: "+runID);
 			String resultsFileName = SessionUtils.getResultsFileNameFromToken(runID);
 			System.err.println("Loading results from "+resultsFileName+"...");
-			results = compendium.loadResults(resultsFileName);
+			results = SignatureSet.loadResults(resultsFileName);
 			System.err.println("done. "+results.size()+" results loaded.");
 			if (results != null){	
 				navigator.navigateTo("results/"+runID);

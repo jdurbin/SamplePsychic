@@ -1,6 +1,8 @@
 package durbin.samplepsychic
 
-
+import grapnel.util.*;
+import grapnel.weka.*;
+import weka.core.*;
 
 class GeneInfo{
 		
@@ -23,4 +25,26 @@ class GeneInfo{
 	
 		return gene2description
 	}
+	
+	static HashMap readENSEMBL2HGNC(ensembl2hgncFile){
+		System.err.print "Reading gene mapping..."
+		def ensembl2hgnc = [:]
+		new OnlineTable(ensembl2hgncFile).eachRow{r->
+			ensembl2hgnc[r.ensembl] = r.hgnc
+		}				
+		System.err.println "done.  ${ensembl2hgnc.size()}"	
+		return ensembl2hgnc
+	}
+	
+	
+	static boolean isENSEMBL(Instances data){
+		boolean bRvalue = false;
+		WekaAdditions.enable();
+		def attrNames = data.attributeNames()
+		attrNames.each{name->
+			if (name.startsWith("ENSG")) bRvalue = true;				
+		}
+		return(bRvalue);		
+	}
+	
 }

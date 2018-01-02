@@ -22,14 +22,14 @@ import com.vaadin.data.util.filter.Compare.*;
 import com.vaadin.data.Container.*
 import com.vaadin.shared.ui.label.ContentMode
 
-
 import grapnel.util.*
 
 class SampleResultGrid2 extends Grid{
-	def cc 
 	
-	def SampleResultGrid2(results,compendium){
-		cc = compendium;
+	SamplePsychicUI app;
+	
+	def SampleResultGrid2(SamplePsychicUI vapp,results){
+		app = vapp;
 		init(results)				
 		this.setCaption("Classification Results")
 		this.setWidth("425px");
@@ -67,31 +67,42 @@ class SampleResultGrid2 extends Grid{
 		def container = new IndexedContainer()		
 		container.addContainerProperty("Sample ID",String.class,null);
 		container.addContainerProperty("Model Name",String.class,null);
-		container.addContainerProperty("Confidence",Double.class,null);
+		//container.addContainerProperty("Confidence",Double.class,null);
+		container.addContainerProperty("Score",Double.class,null);
 		
-		results.each{r->									
+		results.each{r->
+			
+			/*									
 			def (callValue,idx) = r.callAndIdx()									
 			// Only interested in results where best result is 0
-			if (idx != 0) return;
+			System.err.println "idx == "+idx
+			if (idx != 1) {
+				System.err.println "SampleResultGrid2 for ${r.sampleID} idx == 0"
+				return;
+			}else{
+				System.err.println "SampleResultGrid2 for ${r.sampleID} idx == 1"
+			}*/
+						
 			//def idx = 0; // Always take the perspective of the 0 value. 
 			//def callValue = r.classValues[idx] 
 			
+			def callValue = r.classValues[r.preferredIdx]
 			def itemID = container.addItem();
 			Item item = container.getItem(itemID);
 			item.getItemProperty("Sample ID").setValue(r.sampleID as String);			
 			item.getItemProperty("Model Name").setValue(r.modelName as String);
 							
-			def model = cc.modelName2Model[r.modelName]																				
+			def model = app.selectedSignatureSets.modelName2Model[r.modelName]																				
 			def bnm = model.bnm
-			def dynamicbin = bnm.nullDistribution[idx]
+			def dynamicbin = bnm.nullDistribution[r.preferredIdx]
 			def values = dynamicbin.elements()
 			def elements = values.elements() as ArrayList
-			def pr = r.prForValues[idx] // probability.
+			def pr = r.prForValues[r.preferredIdx] // probability.
 			pr = pr.round(3)
-			def nullConf = model.bnm.getSignificance(pr,idx)
+			def nullConf = model.bnm.getSignificance(pr,r.preferredIdx)
 			nullConf = nullConf.round(3)
-			def pr0 = (float) r.prForValues[0]																								
-			item.getItemProperty("Confidence").setValue(nullConf)
+			//item.getItemProperty("Confidence").setValue(nullConf)
+			item.getItemProperty("Score").setValue(pr)
 			System.err.println "buildContainer ${r.sampleID}"
 		}
 		return(container)

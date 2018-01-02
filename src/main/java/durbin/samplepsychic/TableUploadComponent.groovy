@@ -47,13 +47,11 @@ class TableUploadComponent extends CustomComponent{
 	//private static final long serialVersionUID = -4292553844521293140L;
 
 	def app
-	def cc;
 	//def table; // The table of expression values.
 	//def dtg;
 	
 	def TableUploadComponent(SamplePsychicUI vapp){
 		app = vapp;
-		cc = app.compendium;
 	}
 				
 	void init(){

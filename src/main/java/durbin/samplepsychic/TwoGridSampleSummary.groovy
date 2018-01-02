@@ -59,18 +59,16 @@ import hep.aida.ref.Histogram1D;
 class TwoGridSampleSummary {
 	
 	SamplePsychicUI app;
-	ClassifierCompendium cc;
 	GridLayout mainLayout;
 	def bestResults;
 	def sample2Results;
 	def grid1;
 	def grid2;
 	
-	double cutoff = 0.51;
+	double cutoff = 0.7;
 		
 	def TwoGridSampleSummary(SamplePsychicUI vapp){
 		app = vapp;
-		cc = app.compendium;
 	}
 	
 	GridLayout buildLayout(){	
@@ -96,17 +94,18 @@ class TwoGridSampleSummary {
 		sampleSelectorLayout.setSpacing(true);
 		sampleSelectorLayout.setMargin(true);
 				
-		bestResults = cc.getBestResults(app.results,cutoff)
+		//bestResults = SignatureSet.getBestResults(app.results,cutoff)
+		bestResults = SignatureSet.getResultsCutoffByScore(app.results,cutoff)
 		def sample2count = getSample2Count(bestResults)												
 		grid1 = new SampleResultGrid1(sample2count);	
 		
 		// CREATE GRID2
-		sample2Results = cc.getResultsBySample(bestResults)		
+		sample2Results = SignatureSet.getResultsBySample(bestResults)		
 		// TEMP debug
 		def sampleIDs = sample2Results.keySet()	as ArrayList
 		def sampleID = sampleIDs[0]
 		def sampleResults = sample2Results[sampleID]
-		grid2 = new SampleResultGrid2(sampleResults,cc);	
+		grid2 = new SampleResultGrid2(app,sampleResults);	
 
 		// CREATE INFO PANEL
 		// Wrap in a layout to add margin/spacing
@@ -143,7 +142,7 @@ class TwoGridSampleSummary {
 			def selected = event.getSelected() as ArrayList;
 			def selectionID = selected[0]				
 			def sampleID = grid1.getSampleIDFromSelection(selectionID)						
-			def sample2Results = cc.getResultsBySample(bestResults)
+			def sample2Results = SignatureSet.getResultsBySample(bestResults)
 			grid2.update(sample2Results[sampleID])						
 		} as SelectionListener)
 	}		
@@ -162,7 +161,7 @@ class TwoGridSampleSummary {
 			def sampleID = grid2.getFieldFromSelection("Sample ID",selectionID)	
 			def modelName = grid2.getFieldFromSelection("Model Name",selectionID)	
 			System.err.println "Grid2 Selection Listener $sampleID"			
-			def model = cc.modelName2Model[modelName]	
+			def model = app.selectedSignatureSets.modelName2Model[modelName]	
 			def results = sample2Results[sampleID]
 			
 			// Find the selected result

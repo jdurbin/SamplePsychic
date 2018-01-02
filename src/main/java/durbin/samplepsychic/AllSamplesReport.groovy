@@ -49,12 +49,11 @@ import hep.aida.ref.Histogram1D;
  */
 class AllSamplesReport {
 
-	ClassifierCompendium cc;
 	SamplePsychicUI app;
 	VerticalLayout mainLayout;
 	VerticalLayout resultListLayout = new VerticalLayout()
 	def summaryCSVPath;
-	def cutoffValue = 0.99;
+	def cutoffValue = 0.7;
 
 	def globalCounter = 0
 	def classifiersApplied = false;
@@ -65,8 +64,6 @@ class AllSamplesReport {
 
 	def AllSamplesReport(SamplePsychicUI app){
 		this.app = app;
-		//cc = app.mam.cc
-		cc = app.compendium
 	}
 	
 	VerticalLayout buildLayout(){
@@ -164,9 +161,10 @@ class AllSamplesReport {
 				
 		def results = app.results;
 		// Get the best results and build a result by sample list.
-		def bestResults = cc.getBestResults(results,cutoff)
+		//def bestResults = SignatureSet.getBestResults(results,cutoff)
+		def bestResults = SignatureSet.getResultsCutoffByScore(results,cutoff)
 		System.err.println("Total Results: ${results.size()} Best results: "+bestResults.size())
-		def sample2ResultList = cc.getResultsBySample(bestResults)
+		def sample2ResultList = SignatureSet.getResultsBySample(bestResults)
 		
 
 		createReportCardCSV(sample2ResultList,cutoff)
@@ -181,8 +179,9 @@ class AllSamplesReport {
 			// A bunch of results for each sample...
 			def multiResultsVLayout = new VerticalLayout()
 			multiResultsVLayout.setMargin(true)
-			rlist.each{r->
+			rlist.each{r->				
 				def singleResultHLayout = createSingleResultLayout(r,sampleID)
+				if (singleResultHLayout == null) return;
 				multiResultsVLayout.addComponent(singleResultHLayout)
 			}
 			samplePanel.setContent(multiResultsVLayout);
@@ -203,26 +202,29 @@ class AllSamplesReport {
 			System.err.println "Sample ID\tClassifier\tClassifier Call\tClassifier Probability\tBackground Confidence"
 			w.println "Sample ID,Classifier,Classifier Call,Classifier Probability,Background Confidence"
 			sample2Result.each{sampleID,rList->
+				// List of ClassificationPlus
 				rList.each{r->
 					def mname = r.modelName
-					def model = cc.modelName2Model[mname]
+					def model = app.selectedSignatureSets.modelName2Model[mname]
 
-					def (callValue,idx) = r.callAndIdx()
-					
+					// This returns the best call and the index for that call. 
+					// We want to just look at the preferred valence, though...
+					//def (callValue,idx) = r.callAndIdx()					
 					// Only interested in results where best call is 0
-					if (idx != 0) return;
+					// KJD Fix
+					//if (idx != 1) return;
 					//def idx = 0; // Always take the perspective of the 0 value. 
 					//def callValue = r.classValues[idx] 
 					
+					def callValue = r.classValues[r.preferredIdx]
 					def bnm = model.bnm
-					def dynamicbin = bnm.nullDistribution[idx]
+					def dynamicbin = bnm.nullDistribution[r.preferredIdx]
 					def values = dynamicbin.elements()
 					def elements = values.elements() as ArrayList
-					def pr = r.prForValues[idx] // probability.
+					def pr = r.prForValues[r.preferredIdx] // probability.
 					pr = pr.round(3)
-					def nullConf = model.bnm.getSignificance(pr,idx)
+					def nullConf = model.bnm.getSignificance(pr,r.preferredIdx)
 					nullConf = nullConf.round(3)
-					def pr0 = (float) r.prForValues[0]
 					System.err.println "$sampleID\t${r.modelName}\t${callValue}\t${pr}\t${nullConf}"		
 					w.println "$sampleID,${r.modelName},${callValue},${pr},${nullConf}"		
 				}
@@ -241,29 +243,43 @@ class AllSamplesReport {
 	 */
 	def createSingleResultLayout(r,sampleID){
 		def mname = r.modelName
-		def model = cc.modelName2Model[mname]
+		def model = app.selectedSignatureSets.modelName2Model[mname]
 
 		// Layout for one result in a sample's panel.
 		def resultLayout = new HorizontalLayout();
 		resultLayout.setSizeFull();
 
-		//def (callValue,idx) = r.callAndIdx()
-		def idx = 0; // Always take the perspective of the 0 value. 
-		def callValue = r.classValues[idx] 
-				
+
+		/*
+		def (callValue,idx) = r.callAndIdx()
+		if (idx != 1) {
+			System.err.println "Single result for $sampleID idx == 0"
+			return;
+		}else{
+			System.err.println "Single result for $sampleID idx == 1"
+		}
+		//def idx = 0; // Always take the perspective of the 0 value.
+		*/
+		
+		// KJD Fix
+		//def idx = 1; 
+		//def callValue = r.classValues[idx] 
+			
+		def callValue = r.classValues[r.preferredIdx]	
 		def bnm = model.bnm
-		def dynamicbin = bnm.nullDistribution[idx]
+		def dynamicbin = bnm.nullDistribution[r.preferredIdx]
 		def values = dynamicbin.elements()
 		def elements = values.elements() as ArrayList
-		def pr = r.prForValues[idx] // probability.
+		def pr = r.prForValues[r.preferredIdx] // probability.
 		pr = pr.round(3)
-		def nullConf = model.bnm.getSignificance(pr,idx)
+		def nullConf = model.bnm.getSignificance(pr,r.preferredIdx)
 		nullConf = nullConf.round(3)
-		def pr0 = (float) r.prForValues[0]
-
+	
+	
 		resultLayout.addComponent(new Label("<small>${r.modelName}</small>",ContentMode.HTML));
 		resultLayout.addComponent(new Label("<small>${callValue}</small>",ContentMode.HTML));
-		resultLayout.addComponent(new Label("<small>${nullConf}</small>",ContentMode.HTML));
+		//resultLayout.addComponent(new Label("<small>${nullConf}</small>",ContentMode.HTML));
+		resultLayout.addComponent(new Label("<small>${pr}</small>",ContentMode.HTML));
 
 		def hc = new HistogramChart()
 		def chart = hc.createChart(elements,pr)

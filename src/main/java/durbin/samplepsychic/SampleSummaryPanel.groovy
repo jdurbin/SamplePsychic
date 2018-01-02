@@ -70,21 +70,19 @@ public class SampleSummaryPanel extends Panel{
 		setCaption("Sample:\t${sampleID}")
 		setSizeUndefined(); // Shrink to fit content
 		
-		//def (bestCallValue,bestIdx) = r.callAndIdx()
-		def idx = 0; // Always take the perspective of the 0 value. 
-		def callValue = r.classValues[idx] 
+		//def (bestCallValue,bestIdx) = r.callAndIdx()		
+		def callValue = r.classValues[r.preferredIdx] 
 				
 		def bnm = model.bnm
-		def dynamicbin = bnm.nullDistribution[idx]
+		def dynamicbin = bnm.nullDistribution[r.preferredIdx]
 		def values = dynamicbin.elements()
 		def elements = values.elements() as ArrayList
-		def pr = r.prForValues[idx] // probability.
+		def pr = r.prForValues[r.preferredIdx] // probability.
 		pr = pr.round(3)		
 		// Idx looks up one of two null distributions
 		// then computes significance of value pr on that distribution. 
-		def nullConf = model.bnm.getSignificance(pr,idx)				
+		def nullConf = model.bnm.getSignificance(pr,r.preferredIdx)				
 		nullConf = nullConf.round(3)
-		def pr0 = (float) r.prForValues[0]
 							
 		contentLayout = new VerticalLayout();
 		contentLayout.setWidth("860px");

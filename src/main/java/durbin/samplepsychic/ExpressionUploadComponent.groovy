@@ -53,14 +53,12 @@ class ExpressionUploadComponent extends CustomComponent{
 	//private static final long serialVersionUID = -4292553844521293140L;			
 
 	def app
-	def cc; 
 	def dataFileRoot;
 	//def table; // The table of expression values. 
 	//def dtg;
 	
 	def ExpressionUploadComponent(SamplePsychicUI vapp){
 		app = vapp;
-		cc = app.compendium;		
 	}
 				
 	void init(){
@@ -99,46 +97,61 @@ class ExpressionUploadComponent extends CustomComponent{
 				}
 			}
 		})
+		
+		upload.addListener(new Upload.StartedListener() {
+			@Override
+			public void uploadStarted(StartedEvent event) {
+				System.err.println "UPLOAD started: "+event.getFilename()
+			}			
+		});
 	
-		upload.addListener(new Upload.FinishedListener() {
-			
+	
+		upload.addListener(new Upload.ProgressListener() {
+			public void updateProgress(long readBytes, long contentLength) {
+				// This method gets called several times during the update
+				//pi.setValue(new Float(readBytes / (float) contentLength));
+				System.err.println "UPLOAD progress: "+readBytes+"\tof\t"+contentLength
+			}
+		});
+	
+		upload.addListener(new Upload.SucceededListener() {
+			public void uploadSucceeded(SucceededEvent event) {
+				System.err.println "UPLOAD succeded "
+			}
+		});
+	
+		upload.addListener(new Upload.FailedListener() {
+			public void uploadFailed(FailedEvent event) {
+				// This method gets called when the upload failed
+				//status.setValue("Uploading interrupted");
+				System.err.println "UPLOAD failed"
+			}
+		});
+	
+		upload.addListener(new Upload.FinishedListener() {			
 			@Override
 			public void uploadFinished(Upload.FinishedEvent finishedEvent) {
+				System.err.println "UPLOAD Finished"
 				try {						
 					//table = new durbin.util.DoubleTable(tempFileName)
 					app.expressionData = WekaMine.readNumericFromTable(tempFileName)
 					app.fileNameRoot = dataFileRoot
+										
+					// Determines if genes are in HUGO namespace, and if not converts them. 
+					if (GeneInfo.isENSEMBL(app.expressionData)){
+						System.err.println "Converting genes from EMBL to HGNC gene names...";
+						app.expressionData = AttributeUtils.renameAttributes(app.expressionData,app.ensembl2hgnc)
+						System.err.println "done converting genes."
+					}
 					
-					// Normalize expression data
-					app.expressionData = cc.normalize(app.expressionData);
+					// Normalize expression data using exponential normalization (quantiles fit to exponential) 
+					app.expressionData = SignatureSet.normalize(app.expressionData);
 					
 					def uploadNotifyStr = "${app.expressionData.numAttributes()} genes x ${app.expressionData.numInstances()} samples"
 					def uploadNote = new Notification("Expression data uploaded: ",uploadNotifyStr);
 					uploadNote.setType(Type.TRAY_NOTIFICATION);
 					uploadNote.setPosition(Position.BOTTOM_CENTER);
 					uploadNote.show(Page.getCurrent());
-					
-					/*						
-					new Notification("Expression data uploaded: ",
-									 "${app.expressionData.numAttributes()} genes x ${app.expressionData.numInstances()} samples",
-									 //Notification.Type.HUMANIZED_MESSAGE)
-									 Notification.Type.TRAY_NOTIFICATION)
-						.show(Page.getCurrent());
-					*/
-						
-						/* Let's build a container from the CSV File */
-						//FileReader reader = new FileReader(tempFile);
-						//IndexedContainer indexedContainer = buildContainerFromTable(table);
-						//tempFile.delete();
-							
-						//dtg = new DoubleTableGrid(table)
-						
-							
-						/* Finally, let's update the table with the container */
-						//table.setCaption(finishedEvent.getFilename());
-						//dtg.setContainerDataSource(indexedContainer);
-						//layout.addComponent(dtg);
-						//dtg.setVisible(true);
 											
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -165,29 +178,50 @@ class ExpressionUploadComponent extends CustomComponent{
 		//panel.setWidth("-1");
 		//layout.addComponent(panel);
 	}
-	
-	/*
-	def buildContainerFromTable(DoubleTable table){
-		IndexedContainer container = new IndexedContainer()
-		table.colNames.each{colName->
-			container.addContainerProperty(colName,Double.class,null);
-		}
-		
-		for (int r = 0;r < table.numRows;r++) {
-			def rowName = table.rowNames[r]
-			def itemID = container.addItem();
-			Item item = container.getItem(itemID);
-			table.colNames.each{colName->
-				def value = table[rowName][colName]
-				item.getItemProperty(colName).setValue(value)
-			}
-		}
-		return(container)
-	}
-	*/
-	
-	
-	
-	
 }
+
+
+
+/*
+ new Notification("Expression data uploaded: ",
+				  "${app.expressionData.numAttributes()} genes x ${app.expressionData.numInstances()} samples",
+				  //Notification.Type.HUMANIZED_MESSAGE)
+				  Notification.Type.TRAY_NOTIFICATION)
+	 .show(Page.getCurrent());
+ */
+	 
+	 /* Let's build a container from the CSV File */
+	 //FileReader reader = new FileReader(tempFile);
+	 //IndexedContainer indexedContainer = buildContainerFromTable(table);
+	 //tempFile.delete();
+		 
+	 //dtg = new DoubleTableGrid(table)
+	 
+		 
+	 /* Finally, let's update the table with the container */
+	 //table.setCaption(finishedEvent.getFilename());
+	 //dtg.setContainerDataSource(indexedContainer);
+	 //layout.addComponent(dtg);
+	 //dtg.setVisible(true);
 	
+
+
+/*
+ def buildContainerFromTable(DoubleTable table){
+	 IndexedContainer container = new IndexedContainer()
+	 table.colNames.each{colName->
+		 container.addContainerProperty(colName,Double.class,null);
+	 }
+	 
+	 for (int r = 0;r < table.numRows;r++) {
+		 def rowName = table.rowNames[r]
+		 def itemID = container.addItem();
+		 Item item = container.getItem(itemID);
+		 table.colNames.each{colName->
+			 def value = table[rowName][colName]
+			 item.getItemProperty(colName).setValue(value)
+		 }
+	 }
+	 return(container)
+ }
+ */

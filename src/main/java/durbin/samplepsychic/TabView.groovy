@@ -29,7 +29,7 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-import durbin.weka.*
+import grapnel.weka.*
 
 
 
@@ -39,11 +39,9 @@ class TabView extends VerticalLayout implements View{
 	def tab,tab1,tab2,tab3,tab4,tab2column
 	def TabSheet tabsheet
 	def sample2Results
-	def cc
 	
 	def TabView(SamplePsychicUI vapp){	
 		app = vapp
-		cc = app.compendium
 		setSizeFull(); // test copied from VaadinSandbox
 		//setMargin(true);
 	}
@@ -58,8 +56,7 @@ class TabView extends VerticalLayout implements View{
 		System.err.println("DEBUG: navigator.state:"+currentState);
 		
 		System.err.println "ViewTab enter event.parameters= "+event.getParameters()
-		
-						
+								
 		// Rebuild everything on entry??
 		if (tabsheet != null) removeComponent(tabsheet);
 		tabsheet = new TabSheet();
@@ -75,7 +72,7 @@ class TabView extends VerticalLayout implements View{
 		tab.addComponent(resultGrid);
 		
 		def sampleSummaryPanel = new SampleSummaryPanel(app);
-		sample2Results = cc.getResultsBySample(app.results)		
+		sample2Results = SignatureSet.getResultsBySample(app.results)		
 		setupResultGridSelectionListener(resultGrid,sampleSummaryPanel);		
 		tab.addComponent(sampleSummaryPanel);
 		
@@ -138,7 +135,7 @@ class TabView extends VerticalLayout implements View{
 			def selectionID = selected[0]				
 			def sampleID = grid.getSampleIDFromSelection(selectionID)	
 			def modelName = grid.getFieldFromSelection("Model",selectionID)
-			def model = cc.modelName2Model[modelName]	
+			def model = app.selectedSignatureSets.modelName2Model[modelName]	
 			def sampleResults = sample2Results[sampleID]
 			// Find the selected result
 			sampleResults.each{r->
