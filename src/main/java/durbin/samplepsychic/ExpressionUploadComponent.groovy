@@ -138,11 +138,12 @@ class ExpressionUploadComponent extends CustomComponent{
 					app.fileNameRoot = dataFileRoot
 										
 					// Determines if genes are in HUGO namespace, and if not converts them. 
-					if (GeneInfo.isENSEMBL(app.expressionData)){
-						System.err.println "Converting genes from EMBL to HGNC gene names...";
-						app.expressionData = AttributeUtils.renameAttributes(app.expressionData,app.ensembl2hgnc)
-						System.err.println "done converting genes."
-					}
+					//if (GeneInfo.isENSEMBL(app.expressionData)){
+					//	System.err.println "Converting genes from EMBL to HGNC gene names...";
+						//app.expressionData = AttributeUtils.renameAttributes(app.expressionData,app.ensembl2hgnc)
+					//	app.expressionData = AttributeUtils.renameAttributesAndRemoveDupsUnknowns(app.expressionData,app.ensembl2hgnc)
+					//	System.err.println "done converting genes."
+					//}
 					
 					// Normalize expression data using exponential normalization (quantiles fit to exponential) 
 					app.expressionData = SignatureSet.normalize(app.expressionData);

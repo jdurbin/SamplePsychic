@@ -100,7 +100,7 @@ public class SampleSummaryPanel extends Panel{
 		statsList.addComponent(new Label("<small><b>Call:</b> ${callValue}</small>",ContentMode.HTML));
 		statsList.addComponent(new Label("<small><b>Classifier Score:</b> ${pr}</small>",ContentMode.HTML));	
 		statsList.addComponent(new Label("<small><b>Background Confidence:</b> ${nullConf}</small>",ContentMode.HTML));	
-		statsList.addComponent(new Label("<small><b>Background:</b> 2000 Random TCGA Samples</small>",ContentMode.HTML));	
+		statsList.addComponent(new Label("<small><b>Background:</b>All fetal training samples</small>",ContentMode.HTML));	
 		majorSplit.addComponent(statsList)
 		
 		def hc = new HistogramChart()

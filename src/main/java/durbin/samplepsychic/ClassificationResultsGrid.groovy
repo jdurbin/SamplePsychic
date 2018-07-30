@@ -197,6 +197,9 @@ class ClassificationResultsGrid extends Grid{
 			//def callValue = r.classValues[idx] 
 			*/
 			
+			// KJD Temp
+			if (r.preferredIdx == null) r.preferredIdx = 0;
+			
 			def callValue = r.classValues[r.preferredIdx]
 			def bnm = model.bnm
 			def dynamicbin = bnm.nullDistribution[r.preferredIdx]

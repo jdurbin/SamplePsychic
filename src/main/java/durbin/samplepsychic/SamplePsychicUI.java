@@ -71,6 +71,7 @@ public class SamplePsychicUI extends UI {
 	static HashMap gene2description; 
 	static HashMap ensembl2hgnc;
 	static String signatureSetDir;
+	static String jobsDir;
 	static{				
 
 		// Read gene descriptions...	
@@ -87,7 +88,12 @@ public class SamplePsychicUI extends UI {
 		// Read signature sets...
 		signatureSetDir = VaadinServlet.getCurrent().getServletContext().getRealPath("/signaturesets");
 		System.err.println("SIGNATURE SET DIR:"+signatureSetDir);
-		signatureSets = new SignatureSets(signatureSetDir);				
+		signatureSets = new SignatureSets(signatureSetDir);	
+				
+		// Jobs dir
+		jobsDir = VaadinServlet.getCurrent().getServletContext().getRealPath("/jobs");
+		System.err.println("JOBS DIR: "+jobsDir);
+		
 	}
 	
 	// Uploaded expression data
@@ -95,6 +101,7 @@ public class SamplePsychicUI extends UI {
 
 	// Results of classification run. 
 	public ArrayList<ClassificationPlus> results = new ArrayList<ClassificationPlus>();
+	public HashMap<ClassificationPlus,SignatureSet> results2sets;
 
 	// Optional metaData 
 	public Table metaData;
@@ -160,7 +167,8 @@ public class SamplePsychicUI extends UI {
 			currentRunID = runID;
 			// Verify that the saved session actually exists
 			System.err.println("runID in SamplePsychicUI: "+runID);
-			String resultsFileName = SessionUtils.getResultsFileNameFromToken(runID);
+			//String resultsFileName = SessionUtils.getResultsFileNameFromToken(runID,jobsDir);
+			String resultsFileName = jobsDir+"/samplePsychic_"+runID+".results";
 			System.err.println("Loading results from "+resultsFileName+"...");
 			results = SignatureSet.loadResults(resultsFileName);
 			System.err.println("done. "+results.size()+" results loaded.");

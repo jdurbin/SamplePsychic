@@ -62,9 +62,8 @@ predictors may be linear or non-linear SVMs, random forest predictors, or logist
 <p>
 
 Expression data should be a tab delimited file formatted in genes (rows) x samples (columns) format. 
-Both row names and column names are required.  Gene names should be <a href="http://www.genenames.org">HGNC gene names</a>.
-No normalization needs to be applied beyond standard sample processing (e.g. RPKM).  SamplePsychic's built-in normalization
-should allow reasonable performance with both microarray and RNASeq data.   
+Both row names and column names are required.  No normalization needs to be applied beyond standard sample processing (e.g. RPKM).  
+SamplePsychic's built-in normalization should allow reasonable performance with both microarray and RNASeq data.   
 <p>
 <h2>Click below to upload your data and get started:</h2> <p>  
 </small>

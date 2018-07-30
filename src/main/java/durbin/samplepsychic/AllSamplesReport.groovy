@@ -53,7 +53,7 @@ class AllSamplesReport {
 	VerticalLayout mainLayout;
 	VerticalLayout resultListLayout = new VerticalLayout()
 	def summaryCSVPath;
-	def cutoffValue = 0.7;
+	def cutoffValue = 0.98;
 
 	def globalCounter = 0
 	def classifiersApplied = false;

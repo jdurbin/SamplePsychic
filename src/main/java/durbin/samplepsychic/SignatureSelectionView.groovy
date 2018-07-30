@@ -138,8 +138,9 @@ Select the signature sets you wish to apply to your uploaded data:
 			}
 			
 			// Apply models to these signatures. 
-			app.results = app.selectedSignatureSets.applyModels(app.expressionData)
-												
+			app.results = app.selectedSignatureSets.applyModels(app.expressionData)												
+
+		//	(app.results,app.results2sets) = app.selectedSignatureSets.applyModelsRecordSets(app.expressionData)
 			//app.results.each{r->
 				//System.err.println "RESULT: "+r.sampleID+"\t"+r.modelName+"\t"+r.nullConf0;
 				//}
@@ -147,7 +148,7 @@ Select the signature sets you wish to apply to your uploaded data:
 			// TODO:  Make this contingent on a check box or something so only save if user asks us to. 			
 			// Generate a jobID and a fileName for the results to be saved to. 							
 			String jobID,sessionFileName			
-			(jobID,sessionFileName) = SessionUtils.generateResultsTokenAndFileName()	
+			(jobID,sessionFileName) = SessionUtils.generateResultsTokenAndFileName(app.jobsDir)	
 			System.err.println "DEBUG: jobID:$jobID\tfileName: $sessionFileName"
 			
 			app.currentRunID = jobID; // need to strip off everything but root of temp file name...				
