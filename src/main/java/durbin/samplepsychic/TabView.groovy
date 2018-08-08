@@ -87,7 +87,7 @@ class TabView extends VerticalLayout implements View{
  
 		
 		// TAB1 Per-Sample Report=======================
-		AllSamplesReport asr  = new AllSamplesReport(app);
+		AllSamplesReport asr  = new ReportCard(app);
 		VerticalLayout summaryLayout = asr.buildLayout();
 		tabsheet.addTab(summaryLayout,"ReportCard		");				
 		

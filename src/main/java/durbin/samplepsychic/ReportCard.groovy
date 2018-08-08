@@ -47,7 +47,7 @@ import hep.aida.ref.Histogram1D;
  *
  * @author james
  */
-class AllSamplesReport {
+class ReportCard {
 
 	SamplePsychicUI app;
 	VerticalLayout mainLayout;
@@ -62,7 +62,7 @@ class AllSamplesReport {
 	FileDownloader fd;
 	
 
-	def AllSamplesReport(SamplePsychicUI app){
+	def ReportCard(SamplePsychicUI app){
 		this.app = app;
 	}
 	
