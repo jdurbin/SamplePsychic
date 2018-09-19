@@ -61,7 +61,6 @@ class ReportCard {
 	Button downloadButton;
 	FileDownloader fd;
 	
-
 	def ReportCard(SamplePsychicUI app){
 		this.app = app;
 	}
@@ -205,7 +204,7 @@ class ReportCard {
 				// List of ClassificationPlus
 				rList.each{r->
 					def mname = r.modelName
-					def model = app.selectedSignatureSets.modelName2Model[mname]
+					def model = app.signatureSets.modelName2Model[mname]
 
 					// This returns the best call and the index for that call. 
 					// We want to just look at the preferred valence, though...
@@ -243,7 +242,7 @@ class ReportCard {
 	 */
 	def createSingleResultLayout(r,sampleID){
 		def mname = r.modelName
-		def model = app.selectedSignatureSets.modelName2Model[mname]
+		def model = app.signatureSets.modelName2Model[mname]
 
 		// Layout for one result in a sample's panel.
 		def resultLayout = new HorizontalLayout();

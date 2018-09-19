@@ -137,7 +137,7 @@ class ExpressionUploadComponent extends CustomComponent{
 					app.expressionData = WekaMine.readNumericFromTable(tempFileName)
 					app.fileNameRoot = dataFileRoot
 										
-					// Determines if genes are in HUGO namespace, and if not converts them. 
+					// Determines if genes are in HGNC namespace, and if not converts them. 					
 					//if (GeneInfo.isENSEMBL(app.expressionData)){
 					//	System.err.println "Converting genes from EMBL to HGNC gene names...";
 						//app.expressionData = AttributeUtils.renameAttributes(app.expressionData,app.ensembl2hgnc)
@@ -146,6 +146,7 @@ class ExpressionUploadComponent extends CustomComponent{
 					//}
 					
 					// Normalize expression data using exponential normalization (quantiles fit to exponential) 
+					// All SamplePsychic models are built with exponential normalized training data.
 					app.expressionData = SignatureSet.normalize(app.expressionData);
 					
 					def uploadNotifyStr = "${app.expressionData.numAttributes()} genes x ${app.expressionData.numInstances()} samples"

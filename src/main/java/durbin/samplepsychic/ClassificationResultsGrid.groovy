@@ -41,7 +41,14 @@ class ClassificationResultsGrid extends Grid{
 		this.setHeightMode(HeightMode.ROW);
 		this.setHeightByRows(numRows)
 		this.setContainerDataSource(indexedContainer)
+
 		
+		// Attempt to adjust column sizes
+		// Remaining columns should expand to fill??
+		// https://vaadin.com/docs/v7/framework/articles/ConfiguringGridColumnWidths.html
+		this.getColumn("Score").setWidth(100)
+		this.getColumn("Confidence").setWidth(100)
+				
 		// Try to select an initial row..
 		System.err.println "firstItemID: $firstItemID"
 		this.setSelectionMode(Grid.SelectionMode.SINGLE);
@@ -172,42 +179,47 @@ class ClassificationResultsGrid extends Grid{
 		container.addContainerProperty("Model",String.class,null);
 		container.addContainerProperty("Call",String.class,null);
 		container.addContainerProperty("Score",Double.class,null);
+		container.addContainerProperty("Confidence",Double.class,null);
 		
 		System.err.println "Grid about to add ${results.size()} results to grid."		
 		
-		results.eachWithIndex{r,i->						
-			def model = app.selectedSignatureSets.modelName2Model[r.modelName]
+		results.eachWithIndex{r,i->			
+			// Use signatureSets instead of selectedSignature sets because
+			// might be accessing saved results. 			
+			def model = app.signatureSets.modelName2Model[r.modelName]
 			if (model == null){
 				System.err.println "DEBUG: r.modelName: "+r.modelName
-				System.err.println "DEBUG: modelName2Model: "+app.selectedSignatureSets.modelName2Model
+				System.err.println "DEBUG: modelName2Model: "+app.signatureSets.modelName2Model.keySet()
 			}
 					
-/*						
-			def (callValue,idx) = r.callAndIdx()		
-			// Skip samples whose best call is is not the 0 value. 
-			// KJD: FIX... must take this as an input from signature set... might be 0, might be 1
-			if (idx != 1) {
-				System.err.println "ClassificationsResultGrid for {r.modelName} idx ==0"
-				return;
-			}else{
-				System.err.println "ClassificationsResultGrid for {r.modelName} idx ==1"
-			} 			
-
-			//def idx = 0; // Always take the perspective of the 0 value. 
-			//def callValue = r.classValues[idx] 
-			*/
-			
-			// KJD Temp
-			if (r.preferredIdx == null) r.preferredIdx = 0;
+			// KJD Temp hack.
+			// Hack moved to SignatureSelectionView and applied to all results for app 
+			// if no preferred Idx is given, then choose the one that doesn't 
+			// contain indications it's a negative class.  People tend not to 
+			// want to see that it's "not lung".  
+			//if (r.preferredIdx == null) {
+			//	if (r.classValues[0].contains("not_")) r.preferredIdx = 1;
+			//	else if (r.classValues[1].contains("not_")) r.preferredIdx = 0;
+			//	else r.preferredIdx = 0;
+			//}
 			
 			def callValue = r.classValues[r.preferredIdx]
+			if (model == null){
+				System.err.println "NULL MODEL: ${r.modelName}"
+				System.err.println app.signatureSets.modelName2Model.keySet()
+			}
+			
 			def bnm = model.bnm
+			if (bnm == null){
+				System.err.println "NULL BACKGROUND: ${r.modelName}"
+			}
+			
 			def dynamicbin = bnm.nullDistribution[r.preferredIdx]
 			//def values = dynamicbin.elements()
 			//def elements = values.elements() as ArrayList
 			def pr = r.prForValues[r.preferredIdx] // probability from classifier
-			pr = pr.round(3)
-			def nullConf = model.bnm.getSignificance(pr,r.preferredIdx)
+			pr = pr.round(3)			
+			def nullConf = model.bnm.getSignificance(pr,r.preferredIdx) // null confidence from background
 			nullConf = nullConf.round(3)
 			//def pr0 = (float) r.prForValues[0]
 			
@@ -220,6 +232,7 @@ class ClassificationResultsGrid extends Grid{
 			item.getItemProperty("Call").setValue(callValue)						
 			//item.getItemProperty("Confidence").setValue(nullConf)
 			item.getItemProperty("Score").setValue(pr)
+			item.getItemProperty("Confidence").setValue(nullConf)
 			
 			//System.err.println "Added item itemID: $itemID"
 						

@@ -92,7 +92,7 @@ class SampleResultGrid2 extends Grid{
 			item.getItemProperty("Sample ID").setValue(r.sampleID as String);			
 			item.getItemProperty("Model Name").setValue(r.modelName as String);
 							
-			def model = app.selectedSignatureSets.modelName2Model[r.modelName]																				
+			def model = app.signatureSets.modelName2Model[r.modelName]																				
 			def bnm = model.bnm
 			def dynamicbin = bnm.nullDistribution[r.preferredIdx]
 			def values = dynamicbin.elements()

@@ -87,45 +87,32 @@ class TabView extends VerticalLayout implements View{
  
 		
 		// TAB1 Per-Sample Report=======================
-		AllSamplesReport asr  = new ReportCard(app);
+		ReportCard asr  = new ReportCard(app);
 		VerticalLayout summaryLayout = asr.buildLayout();
-		tabsheet.addTab(summaryLayout,"ReportCard		");				
-		
-		// TAB2 TSNE Component =======================
-		//tab2 = new TsneComponent(app)
-		//tab2.runTSne(app.results)
-		//tab2.addComponent(new Label("Correlate classification vectors for each sample and <br> display as clustered heatmap (samples vs samples",ContentMode.HTML));		
-		//tabsheet.addTab(tab2,"Tsne");		
+		tabsheet.addTab(summaryLayout,"ReportCard		");							
  		
 		// Add two grid sample summary...
 		def tgss = new TwoGridSampleSummary(app);
 		GridLayout tcssLayout = tgss.buildLayout();
-		tabsheet.addTab(tcssLayout,"ExploreSamples");		
-						
-		// TAB3 Tsne
-		def fileNames = ["wmmodelmodel_dims117_p8.tab","wmmodelmodel_dims117_p7.tab"]
-		def chart = createScatterChartFromFiles(fileNames);
+		tabsheet.addTab(tcssLayout,"ExploreSamples");										
+		
+		
+		// TAB3 TSNE Component =======================
+		TsneComponent tsne = new TsneComponent(app);
+		VerticalLayout tsneLayout = tsne.buildLayout();
+		tabsheet.addTab(tsneLayout,"Result Clusters");
+		
+		
+		// TAB4 Tsne mock-up		
+		//def fileNames = ["wmmodelmodel_dims117_p8.tab","wmmodelmodel_dims117_p7.tab"]
+		//def chart = createScatterChartFromFiles(fileNames);
 		//def chart = createScatterChart();
-		tab3 = new VerticalLayout();
-		tab3.addComponent(chart);
-		tab3.setComponentAlignment(chart, Alignment.MIDDLE_LEFT);
-		tab3.setExpandRatio(chart, 1.0f);			
-		tab3.addComponent(new Label("Explore predictive genes.  <br>Overall, or for selected samples and/or models.",ContentMode.HTML));
-		tabsheet.addTab(tab3,"SampleClusters");
-				
-		// TAB4 Tumor Map/Scatter Chart=======================
 		//tab4 = new VerticalLayout();
-		//tab4.addComponent(new Label("Tumor map display of samples using classifier vector <br> correlations as distance (and/or expression correlations",ContentMode.HTML));
-		//def hsc = new HighScatterChart();
-		//hsc.addTestDataToSeries(fileNames);
-		//def xvals=[1.24,2.23,3.45,2.84,8.1,9,20]
-		//def yvals=[1.0,2.0,3.0,4.0,5.0,6.0,7.0]
-		//hsc.addXYDataToSeries("Series1",xvals,yvals);
-		//def scatterchart = hsc.createScatterChart();
-		//tab4.addComponent(scatterchart);
-		//tab4.setComponentAlignment(scatterchart, Alignment.MIDDLE_LEFT);
-		//tab4.setExpandRatio(scatterchart, 1.0f);
-		//tabsheet.addTab(tab4,"ScatterTestNew");
+		//tab4.addComponent(chart);
+		//tab4.setComponentAlignment(chart, Alignment.MIDDLE_LEFT);
+		//tab4.setExpandRatio(chart, 1.0f);					
+		//tabsheet.addTab(tab4,"Mockup");
+
 	}
 	
 	
@@ -135,7 +122,7 @@ class TabView extends VerticalLayout implements View{
 			def selectionID = selected[0]				
 			def sampleID = grid.getSampleIDFromSelection(selectionID)	
 			def modelName = grid.getFieldFromSelection("Model",selectionID)
-			def model = app.selectedSignatureSets.modelName2Model[modelName]	
+			def model = app.signatureSets.modelName2Model[modelName]
 			def sampleResults = sample2Results[sampleID]
 			// Find the selected result
 			sampleResults.each{r->

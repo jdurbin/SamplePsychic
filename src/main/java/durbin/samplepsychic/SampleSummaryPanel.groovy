@@ -66,6 +66,8 @@ public class SampleSummaryPanel extends Panel{
 	}
 		
 	// r = result
+	// Builds a new sample result summary panel for a given selected sample. 
+	// 
 	def update(sampleID,model,r){
 		setCaption("Sample:\t${sampleID}")
 		setSizeUndefined(); // Shrink to fit content
@@ -96,11 +98,13 @@ public class SampleSummaryPanel extends Panel{
 		majorSplit.setMargin(new MarginInfo(false, true, false, true)); // top right bottom left
 		
 		def statsList = new VerticalLayout();
-		statsList.addComponent(new Label("<small><b>Model:</b> ${r.modelName}</small>",ContentMode.HTML));
-		statsList.addComponent(new Label("<small><b>Call:</b> ${callValue}</small>",ContentMode.HTML));
-		statsList.addComponent(new Label("<small><b>Classifier Score:</b> ${pr}</small>",ContentMode.HTML));	
-		statsList.addComponent(new Label("<small><b>Background Confidence:</b> ${nullConf}</small>",ContentMode.HTML));	
-		statsList.addComponent(new Label("<small><b>Background:</b>All fetal training samples</small>",ContentMode.HTML));	
+		def modelSet = app.signatureSets.modelName2Set[r.modelName];
+				
+		statsList.addComponent(new Label("<small><b>Model: </b>${r.modelName}</small>",ContentMode.HTML));
+		statsList.addComponent(new Label("<small><b>Call: </b>${callValue}</small>",ContentMode.HTML));
+		statsList.addComponent(new Label("<small><b>Classifier Score: </b>${pr}</small>",ContentMode.HTML));	
+		statsList.addComponent(new Label("<small><b>Background Confidence: </b>${nullConf}</small>",ContentMode.HTML));	
+		statsList.addComponent(new Label("<small><b>Background: </b>${modelSet.backgroundDescription}</small>",ContentMode.HTML));	
 		majorSplit.addComponent(statsList)
 		
 		def hc = new HistogramChart()
@@ -112,8 +116,7 @@ public class SampleSummaryPanel extends Panel{
 		majorSplit.setComponentAlignment(chart, Alignment.MIDDLE_RIGHT);
 		
 		contentLayout.addComponent(majorSplit)
-		
-		
+				
 		def majorSplit2 = new HorizontalLayout();
 		majorSplit2.setWidth("100%");
 		//majorSplit2.setMargin(true);
@@ -121,7 +124,12 @@ public class SampleSummaryPanel extends Panel{
 
 		// Get gene list from model...
 		def feature2score = WekaClassifierInfo.getFeatures(model.classifier);
-		//System.err.println feature2score
+		// If we didn't get a valid mapping, just list the genes in 
+		// the model with uniform weight...
+		if (feature2score == null){
+			feature2score = [:]
+			model.attributes().each{feature2score[it] = 1.0 as double}
+		}
 		geneGrid = buildGeneGrid(feature2score)		
 						
 		majorSplit2.addComponent(geneGrid)
@@ -152,6 +160,7 @@ public class SampleSummaryPanel extends Panel{
 	}
 	
 	def buildGeneGrid(feature2score){
+		System.err.println "buildGeneGrid"
 		def container = buildGeneContainer(feature2score)
 		def geneGrid = new Grid();		
 		geneGrid.setContainerDataSource(container)
@@ -166,12 +175,14 @@ public class SampleSummaryPanel extends Panel{
 	}
 	
 	def buildGeneContainer(feature2score){
+		System.err.println "buildGeneContainer"
 		def container = new IndexedContainer()		
 		container.addContainerProperty("Gene",String.class,null);
 		container.addContainerProperty("Weight",Double.class,null);
 		feature2score.each{f,s->
 			def itemID = container.addItem();
 			Item item = container.getItem(itemID);
+			//System.err.println "gene: $f\t$s"
 			item.getItemProperty("Gene").setValue(f as String);
 			item.getItemProperty("Weight").setValue(s);
 		}		
@@ -179,13 +190,14 @@ public class SampleSummaryPanel extends Panel{
 	}	
 	
 	def setupGridSelectionListener(){
+		System.err.println "setupGridSelectionListener"
 		geneGrid.addSelectionListener({event->
 			def selected = event.getSelected() as ArrayList;
 			def selectionID = selected[0]							
 			def item = geneGrid.getContainerDataSource().getItem(selectionID)
 			def geneName = item.getItemProperty("Gene").getValue()
 			def description = app.gene2description[geneName]
-			//System.err.println "[$geneName]\t[$description]"
+			System.err.println "[$geneName]\t[$description]"
 			if (description == null) description = "No description available."
 			
 			// Use Html styling to shrink text.

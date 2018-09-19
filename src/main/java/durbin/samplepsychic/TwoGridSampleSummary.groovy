@@ -161,7 +161,7 @@ class TwoGridSampleSummary {
 			def sampleID = grid2.getFieldFromSelection("Sample ID",selectionID)	
 			def modelName = grid2.getFieldFromSelection("Model Name",selectionID)	
 			System.err.println "Grid2 Selection Listener $sampleID"			
-			def model = app.selectedSignatureSets.modelName2Model[modelName]	
+			def model = app.signatureSets.modelName2Model[modelName]	
 			def results = sample2Results[sampleID]
 			
 			// Find the selected result

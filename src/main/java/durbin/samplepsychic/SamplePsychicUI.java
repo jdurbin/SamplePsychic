@@ -143,7 +143,7 @@ public class SamplePsychicUI extends UI {
 		
 		navigator = new Navigator(this, viewDisplay);
 		navigator.addView("loadData", new UploadView("Load Data",this));
-		SignatureSelectionView ssv = new SignatureSelectionView("Select Signatures",this);
+		SignatureSelectionView ssv = new SignatureSelectionView("Select Models",this);
 		navigator.addView("evalModels", ssv);
 		TabView resultsView = new TabView(this);
 		navigator.addView("results", resultsView);
@@ -255,7 +255,7 @@ public class SamplePsychicUI extends UI {
        
         String tooltip="Upload expression data.";	
         uploadButton = createButton(FontAwesome.UPLOAD,"loadData","1) Upload",tooltip);
-        tooltip = "Apply signatures to data.";
+        tooltip = "Apply models to data.";
         createButton(FontAwesome.MAGIC,"evalModels","2) Analyze",tooltip);
         tooltip = "Explore signature report card";
         createButton(FontAwesome.BAR_CHART_O,"results","3) Explore",tooltip);                    			    

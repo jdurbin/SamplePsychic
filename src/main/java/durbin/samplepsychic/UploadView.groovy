@@ -50,11 +50,11 @@ into sets including:
 <ul>
 <li> TCGA PANCAN Mutations </li>
 <li> TCGA PANCAN <a href="http://cbio.mskcc.org/tools/memo/">MEMO Events</a> </li>
-<li> TCGA PANCAN Clinical Observations </li>
-<li> TCGA PANCAN Clinical Outcomes </li>
+<li> Chromatin State Models </li> 
+<li> Gene Essentiality Models </li> 
 <li> Cancer Cell Line drug sensitivity (<a href="http://www.broadinstitute.org/ccle/home">CCLE</a>)</li>
-<li> Tree of Cells Cell Types </li>
-<li> Stem Cell Types </li>	
+<li> Fetal Brain Clusters </li> 
+<li> CIBERSORT LM22</li>
 </ul>
 
 Sample Psychic is a heterogeneous collection of classifiers  tuned to each specific prediction target. Individual 
@@ -63,7 +63,8 @@ predictors may be linear or non-linear SVMs, random forest predictors, or logist
 
 Expression data should be a tab delimited file formatted in genes (rows) x samples (columns) format. 
 Both row names and column names are required.  No normalization needs to be applied beyond standard sample processing (e.g. RPKM).  
-SamplePsychic's built-in normalization should allow reasonable performance with both microarray and RNASeq data.   
+SamplePsychic's built-in normalization should allow reasonable performance with both microarray and RNASeq data though 
+models were all trained on RNASeq   
 <p>
 <h2>Click below to upload your data and get started:</h2> <p>  
 </small>
